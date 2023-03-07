@@ -14,6 +14,14 @@ $container->set('upload_directory', $_SERVER["DOCUMENT_ROOT"] . '/tmp/webserver'
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
+function parse_wp_package($fileLocation)
+{
+	$package = new Max_WP_Package($fileLocation);
+	$packageMetadata = $package->get_metadata();
+	$packageMetadata['type'] = $package->get_type();
+	return $packageMetadata;
+}
+
 $app->post('/', function (Request $request, Response $response, $args) {
 	// Check uploaded files
 	$uploadedFiles = $request->getUploadedFiles();
@@ -56,14 +64,12 @@ $app->post('/', function (Request $request, Response $response, $args) {
 		$zipFile->extractTo($temporaryDirectory, $listOfZipFiles);
 
 		foreach ($listOfZipFiles as $file) {
-			$fileLocation = $temporaryDirectory . '/' . $file;
-			$package = new Max_WP_Package($fileLocation);
-			$results[] = $package->get_metadata();
-		}		
+			$packageMetadata = parse_wp_package($temporaryDirectory . '/' . $file);
+			$results[] = $packageMetadata;
+		}
 	} else {
-		$fileLocation = $temporaryDirectory . '/' . $filename;
-		$package = new Max_WP_Package($fileLocation);
-		$results[] = $package->get_metadata();
+		$packageMetadata = parse_wp_package($temporaryDirectory . '/' . $filename);
+		$results[] = $packageMetadata;
 	}
 
 	// Remove the temporary directory
