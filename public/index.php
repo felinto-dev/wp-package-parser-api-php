@@ -65,11 +65,17 @@ $app->post('/', function (Request $request, Response $response, $args) {
 
 		foreach ($listOfZipFiles as $file) {
 			$packageMetadata = parse_wp_package($temporaryDirectory . '/' . $file);
-			$results[] = $packageMetadata;
+
+			if ($packageMetadata['type'] !== 'null') {
+				$results[] = $packageMetadata;
+			}
 		}
 	} else {
 		$packageMetadata = parse_wp_package($temporaryDirectory . '/' . $filename);
-		$results[] = $packageMetadata;
+
+		if ($packageMetadata['type'] !== 'null') {
+			$results[] = $packageMetadata;
+		}
 	}
 
 	// Remove the temporary directory
