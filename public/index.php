@@ -18,24 +18,34 @@ $app->post('/', function (Request $request, Response $response, $args) {
 	}
 
 	$file = $uploadedFiles['file'];
+	print_r($file->getError());
 
 	if ($file->getSize() > 50 * 1024 * 1024) {
 		throw new \Exception('O tamanho máximo do arquivo é de 50MB');
 	}
 
-	if ($file->getClientMediaType() !== 'application/zip') {
-		throw new \Exception('Somente arquivos ZIP são permitidos');
-	}
+	// if ($file->getClientMediaType() !== 'application/zip') {
+	// 	print_r($file->getClientMediaType());
+	// 	throw new \Exception('Somente arquivos ZIP são permitidos');
+	// }
+
+	print_r($uploadedFiles['file']);
 
 	// Move file to temporary storage
-	$temporary_storage = new TemporaryStorage();
-	$directory = $temporary_storage->get_directory();
+	// $temporary_storage = new TemporaryStorage();
+	// $directory = $temporary_storage->get_directory();
 
-	mkdir($directory, 0777, true);
-	$filename = 'file.zip';
-	$file->moveTo($directory . '/' . $filename);
+	// mkdir($directory, 0777, true);
+	// $filename = 'file.zip';
+	// $file->moveTo($directory . '/' . $filename);
 
-	$response->getBody()->write("Hello world! UUID: {$temporary_storage->get_directory()}");
+	// $zipFile = new \PhpZip\ZipFile();
+	// $zipFile->openFile($directory . '/' . $filename);
+	// $listFiles = $zipFile->getListFiles();
+	// print_r($listFiles);
+
+	// $response->getBody()->write("Hello world! UUID: {$temporary_storage->get_directory()}");
+	$response->getBody()->write("Hey there!");
 	return $response;
 });
 
