@@ -24,4 +24,4 @@ FROM base AS final
 
 COPY --from=build /app /app
 
-CMD ["php", "-S", "0.0.0.0:$PORT", "-t", "public", "public/index.php"]
+CMD ["./worker.sh"]
