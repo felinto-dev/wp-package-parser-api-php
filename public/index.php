@@ -44,8 +44,34 @@ $app->post('/', function (Request $request, Response $response, $args) {
 	$zipFile->openFile($temporaryDirectory . '/' . $filename);
 	$listFiles = $zipFile->getListFiles();
 
-	$response->getBody()->write("Arquivo enviado com sucesso!");
-	return $response;
+	# Check if there others zip files inside the zip
+	$listOfZipFiles = array_filter($listFiles, function ($value) {
+		$extension = substr($value, -4);
+		return $extension === ".zip";
+	});
+
+	$results = [];
+
+	if (count($listOfZipFiles) >= 1) {
+		$zipFile->extractTo($temporaryDirectory, $listOfZipFiles);
+
+		foreach ($listOfZipFiles as $file) {
+			$fileLocation = $temporaryDirectory . '/' . $file;
+			$package = new Max_WP_Package($fileLocation);
+			$results[] = $package->get_metadata();
+		}		
+	} else {
+		$fileLocation = $temporaryDirectory . '/' . $filename;
+		$package = new Max_WP_Package($fileLocation);
+		$results[] = $package->get_metadata();
+	}
+
+	// Remove the temporary directory
+	rmrdir($temporaryDirectory);
+
+	# Encode and return the json
+	$response->getBody()->write(json_encode($results));
+	return $response->withHeader('Content-Type', 'application/json');
 });
 
 $app->run();

@@ -4,6 +4,8 @@
         "slim/psr7": "^1.6",
         "ramsey/uuid": "^4.7",
         "nelexa/zip": "^4.0",
-        "php-di/php-di": "^7.0"
+        "php-di/php-di": "^7.0",
+        "perchten/rmrdir": "^1.0",
+        "tutv95/wp-package-parser": "^1.0"
     }
 }
