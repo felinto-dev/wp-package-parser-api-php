@@ -24,4 +24,5 @@ FROM base AS final
 
 COPY --from=build /app /app
 
+RUN chmod +x worker.sh
 CMD ["./worker.sh"]
