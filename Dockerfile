@@ -1,22 +1,27 @@
-# Imagem base com PHP 8.2 e Apache
-FROM php:8.2-apache
+FROM php:8.2-fpm AS base
+WORKDIR /app
 
-# Instalação do libzip-dev e extensão zip
-RUN apt-get update && apt-get install -y \
-    libzip-dev \
-    && docker-php-ext-install zip
+## Install OS dependencies
+RUN apt update \
+	&& export DEBIAN_FRONTEND=noninteractive \
+	&& apt install -y --no-install-recommends libzip-dev \
+	&& apt purge -y --auto-remove
 
-# Define o diretório de trabalho como /var/www/html
-WORKDIR /var/www/html
+## Install PHP depedencies
+RUN docker-php-ext-install zip
 
-# Copia os arquivos da aplicação para o diretório de trabalho
+FROM composer AS build
+WORKDIR /app
+
+COPY composer.json .
+COPY composer.lock .
+RUN composer install --no-dev --no-scripts --ignore-platform-reqs
+
 COPY . .
+RUN composer dumpautoload --optimize
 
-# Exposição dinâmica da porta através da variável de ambiente $PORT
-EXPOSE $PORT
+FROM base AS final
 
-# Configurar o domínio do Railway
-RUN echo "ServerName $RAILWAY_STATIC_URL" >> /etc/apache2/apache2.conf
+COPY --from=build /app /app
 
-# Inicialização do servidor web Apache
-CMD ["apache2-foreground"]
+CMD ["php", "-S", "0.0.0.0:$PORT", "-t", "public", "public/index.php"]
