@@ -30,7 +30,8 @@ $app->post('/', function (Request $request, Response $response, $args) {
 	$directory = $temporary_storage->get_directory();
 
 	mkdir($directory, 0777, true);
-	$file->moveTo($directory . '/file.zip');
+	$filename = 'file.zip';
+	$file->moveTo($directory . '/' . $filename);
 
 	$response->getBody()->write("Hello world! UUID: {$temporary_storage->get_directory()}");
 	return $response;
