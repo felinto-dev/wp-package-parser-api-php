@@ -10,6 +10,7 @@ require_once __DIR__ . '/../src/temporary-storage.php';
 $app = AppFactory::create();
 
 $app->post('/', function (Request $request, Response $response, $args) {
+	// Check uploaded files
 	$uploadedFiles = $request->getUploadedFiles();
 
 	if (empty($uploadedFiles['file'])) {
@@ -26,6 +27,7 @@ $app->post('/', function (Request $request, Response $response, $args) {
 		throw new \Exception('Somente arquivos ZIP são permitidos');
 	}
 
+	// Move file to temporary storage
 	$temporary_storage = new TemporaryStorage();
 	$directory = $temporary_storage->get_directory();
 
