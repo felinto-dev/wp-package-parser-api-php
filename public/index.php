@@ -19,6 +19,7 @@ function parse_wp_package($fileLocation)
 	$package = new Max_WP_Package($fileLocation);
 	$packageMetadata = $package->get_metadata();
 	$packageMetadata['type'] = $package->get_type();
+	$packageMetadata['hash'] = hash_file('sha256', $fileLocation);
 	return $packageMetadata;
 }
 
