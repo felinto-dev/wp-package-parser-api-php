@@ -24,7 +24,7 @@ function parse_wp_package($fileLocation)
 }
 
 $app->post('/', function (Request $request, Response $response, $args) {
-	// Check uploaded files
+	# Check uploaded files
 	$uploadedFiles = $request->getUploadedFiles();
 
 	if (empty($uploadedFiles['file'])) {
@@ -41,7 +41,7 @@ $app->post('/', function (Request $request, Response $response, $args) {
 		throw new \Exception('Somente arquivos ZIP são permitidos');
 	}
 
-	// Move file to temporary storage
+	# Move file to temporary storage
 	$uuid = Uuid::uuid4()->toString();
 	$temporaryDirectory = $_SERVER["DOCUMENT_ROOT"] . '/tmp/' . $uuid;
 	mkdir($temporaryDirectory, 0777, true);
@@ -66,6 +66,7 @@ $app->post('/', function (Request $request, Response $response, $args) {
 
 		foreach ($listOfZipFiles as $file) {
 			$packageMetadata = parse_wp_package($temporaryDirectory . '/' . $file);
+			$packageMetadata['location'] = $file;
 
 			if ($packageMetadata['type'] !== 'null') {
 				$results[] = $packageMetadata;
@@ -79,7 +80,7 @@ $app->post('/', function (Request $request, Response $response, $args) {
 		}
 	}
 
-	// Remove the temporary directory
+	# Remove the temporary directory
 	rmrdir($temporaryDirectory);
 
 	# Encode and return the json
