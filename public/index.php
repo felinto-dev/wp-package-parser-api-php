@@ -50,6 +50,8 @@ $app->post('/', function (Request $request, Response $response, $args) use ($app
 		throw new HttpBadRequestException($request, 'Somente arquivos ZIP são permitidos');
 	}
 
+	print_r($_SERVER["DOCUMENT_ROOT"]);
+
 	# Move file to temporary storage
 	$uuid = Uuid::uuid4()->toString();
 	$temporaryDirectory = $_SERVER["DOCUMENT_ROOT"] . '/tmp/' . $uuid;
