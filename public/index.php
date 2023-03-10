@@ -23,6 +23,14 @@ function parse_wp_package($fileLocation)
 	return $packageMetadata;
 }
 
+function format_response($fileLocation, $packages, $isDoubleZipped) {
+	return [
+		'is_double_zipped' => $isDoubleZipped,
+		'sha256' => hash_file('sha256', $fileLocation),
+		'packages' => $packages,
+	];
+}
+
 $app->post('/', function (Request $request, Response $response, $args) {
 	# Check uploaded files
 	$uploadedFiles = $request->getUploadedFiles();
@@ -59,7 +67,8 @@ $app->post('/', function (Request $request, Response $response, $args) {
 		return $extension === ".zip";
 	});
 
-	$results = [];
+	$packages = [];
+	$isDoubleZipped = false;
 
 	if (count($listOfZipFiles) >= 1) {
 		$zipFile->extractTo($temporaryDirectory, $listOfZipFiles);
@@ -69,22 +78,24 @@ $app->post('/', function (Request $request, Response $response, $args) {
 			$packageMetadata['location'] = $file;
 
 			if ($packageMetadata['type'] !== 'null') {
-				$results[] = $packageMetadata;
+				$packages[] = $packageMetadata;
+				$isDoubleZipped = true;
 			}
 		}
 	} else {
 		$packageMetadata = parse_wp_package($temporaryDirectory . '/' . $filename);
 
 		if ($packageMetadata['type'] !== 'null') {
-			$results[] = $packageMetadata;
+			$packages[] = $packageMetadata;
 		}
 	}
+
+	# Encode and return the json
+	$response->getBody()->write(json_encode(format_response($temporaryDirectory . '/' . $filename, $packages, $isDoubleZipped)));
 
 	# Remove the temporary directory
 	rmrdir($temporaryDirectory);
 
-	# Encode and return the json
-	$response->getBody()->write(json_encode($results));
 	return $response->withHeader('Content-Type', 'application/json');
 });
 
