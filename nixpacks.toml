@@ -1,2 +1,0 @@
-[phases.setup]
-cmds = ["...", "chmod -R ugo+rw /app"]
