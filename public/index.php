@@ -5,6 +5,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use DI\ContainerBuilder;
 use Ramsey\Uuid\Uuid;
+use Slim\Exception\HttpBadRequestException;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -31,22 +32,22 @@ function format_response($fileLocation, $packages, $isDoubleZipped) {
 	];
 }
 
-$app->post('/', function (Request $request, Response $response, $args) {
+$app->post('/', function (Request $request, Response $response, $args) use ($app) {
 	# Check uploaded files
 	$uploadedFiles = $request->getUploadedFiles();
 
 	if (empty($uploadedFiles['file'])) {
-		throw new \Exception('Nenhum plugin ou tema WordPress foi enviado');
+		throw new HttpBadRequestException($request, 'Nenhum plugin ou tema WordPress foi enviado');
 	}
 
 	$file = $uploadedFiles['file'];
 
 	if ($file->getSize() > 50 * 1024 * 1024) {
-		throw new \Exception('O tamanho máximo do arquivo é de 50MB');
+		throw new HttpBadRequestException($request, 'O tamanho máximo do arquivo é de 50MB');
 	}
 
 	if ($file->getClientMediaType() !== 'application/zip') {
-		throw new \Exception('Somente arquivos ZIP são permitidos');
+		throw new HttpBadRequestException($request, 'Somente arquivos ZIP são permitidos');
 	}
 
 	# Move file to temporary storage
@@ -99,4 +100,5 @@ $app->post('/', function (Request $request, Response $response, $args) {
 	return $response->withHeader('Content-Type', 'application/json');
 });
 
+$app->addErrorMiddleware(true, true, true);
 $app->run();
